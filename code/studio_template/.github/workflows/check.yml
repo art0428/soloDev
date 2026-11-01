@@ -1,0 +1,83 @@
+# 只做檢查、不部署（手冊第 3 章）。部署由部署對話照 deploy/部署說明.md 手動做。
+# E2E 不在這裡跑：留給每天凌晨的夜間守衛（nightly-guard）。
+name: check
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # 測試庫由 run-tests.sh 以隨機名稱建在這個 service 裡，跑完刪掉
+      DATABASE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # gitleaks 要看歷史
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: 安裝
+        run: pnpm install --frozen-lockfile
+
+      - name: 契約格式
+        run: pnpm openapi:lint
+
+      - name: 契約與產生物一致（改了 openapi.yaml 要一起提交 schema.d.ts）
+        run: |
+          pnpm openapi:gen
+          git diff --exit-code -- packages/api-client/src/schema.d.ts
+
+      - name: 型別檢查
+        run: pnpm typecheck
+
+      - name: 契約漂移（每支路由都在契約裡、都被測試打過）
+        run: node scripts/check-contract-drift.mjs
+
+      - name: guard-kit 自測
+        run: pnpm --filter @studio/guard-kit run test
+
+      - name: 前台 lint 與測試
+        run: |
+          pnpm --filter front run lint
+          pnpm --filter front run test
+
+      - name: 後端測試（migrate 模式：疊 migration 建庫＋漂移檢查）
+        run: pnpm --filter backend run test:migrate
+
+      - name: 前台 build
+        run: pnpm --filter front run build
+
+      - name: 密鑰掃描
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 相依漏洞（high 以上才擋）
+        run: pnpm audit --audit-level=high

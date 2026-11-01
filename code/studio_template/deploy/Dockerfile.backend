@@ -1,0 +1,51 @@
+# 後端（Fastify + Prisma）容器映像，給 Cloud Run 用。
+#
+# 建置起點是 repo 根目錄，不是 backend/：後端依賴 workspace 套件（packages/demo-world）與根目錄的 pnpm-lock.yaml。
+#   gcloud builds submit --config deploy/cloudbuild.yaml --substitutions=_TAG=vN .
+#   （本機有 Docker 時：docker build -f deploy/Dockerfile.backend -t backend:dev .）
+#
+# 以 tsx 直接跑 TypeScript（與本機 pnpm dev 同一條路），所以 tsx 這類開發相依也要裝。
+# 只裝後端與它依賴的 workspace 套件（--filter backend...），前台的 React、Vite、Playwright 不會進映像。
+#
+# Node 主版本要跟 .node-version 一樣，守衛測試 node-version.test.ts 會比對下面這行 FROM。
+FROM node:22-slim
+
+# Prisma 需要 openssl；ca-certificates 給對外 HTTPS（MCC 的 OIDC discovery、member/check）
+RUN apt-get update -y \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# pnpm 版本跟根目錄 package.json 的 packageManager 一致（corepack 會照那一欄裝）
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable
+
+WORKDIR /app
+
+# 1) 先只放套件清單，相依沒變時這一層會用快取
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY backend/package.json backend/
+COPY packages/demo-world/package.json packages/demo-world/
+COPY packages/guard-kit/package.json packages/guard-kit/
+# postinstall 會跑 prisma generate，需要 schema
+COPY backend/prisma backend/prisma
+RUN pnpm install --frozen-lockfile --filter "backend..."
+
+# 2) 再放原始碼（.dockerignore 擋掉 .env 與測試產物；prisma/migrations 要留著，啟動時會比對有沒有落後）
+COPY packages/demo-world packages/demo-world
+COPY backend backend
+
+ENV NODE_ENV=production
+# Cloud Run 會注入 PORT（預設 8080），要聽 0.0.0.0 外面才連得到
+ENV HOST=0.0.0.0
+ENV PORT=8080
+# 保險層：讓日誌與第三方套件的本地時間貼近營運時區。程式正確性不依賴這一行（lib/dates.ts 一律明確指定時區）。
+# 要跟 BUSINESS_TZ 一樣。
+ENV TZ=Asia/Taipei
+EXPOSE 8080
+
+RUN chown -R node:node /app
+USER node
+WORKDIR /app/backend
+
+# 用 node --import tsx 跑在同一個行程，Cloud Run 送的 SIGTERM 會直接到 server.ts 的關機處理
+CMD ["node", "--import", "tsx", "src/server.ts"]

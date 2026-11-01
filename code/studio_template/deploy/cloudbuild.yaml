@@ -1,0 +1,51 @@
+# Cloud Build：只建後端映像並推到 Artifact Registry。不跑 migration、不部署。
+#
+# 為什麼不在這裡一次做完：部署順序是「備份 → 只新增的 migration → 部署後端 → 前台 → 煙霧測試」，
+# 每一步都要使用者當次允許，破壞性 migration 的順序還要反過來（先部署程式再跑）。
+# 全部塞進一支 build 等於把這些檢查點拿掉。部署照 deploy/部署說明.md 3.2 一步一步做。
+#
+# 用法（在 repo 根目錄，工作目錄乾淨且已 commit）：
+#   gcloud builds submit --config deploy/cloudbuild.yaml --substitutions=_TAG=v3 .
+# 上傳哪些檔由根目錄的 .gcloudignore 決定。
+#
+# 映像 tag 一律 vN、遞增不覆蓋：同一個 tag 已經存在，第一步就失敗。出事時才能秒退回上一版。
+
+substitutions:
+  _REGION: asia-east1
+  # Artifact Registry 的 repo 名，init.sh 會換成專案代號
+  _REPO: <專案名>
+  # 這次的版本號，例 v3。每次部署都要給，沒給第一步就失敗。
+  _TAG: ""
+
+steps:
+  - id: check-tag
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -eu
+        if ! echo "${_TAG}" | grep -Eq '^v[0-9]+$'; then
+          echo "✖ _TAG 要是 v 加數字（例 v3），現在是「${_TAG}」"; exit 1
+        fi
+        if gcloud artifacts docker images describe "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:${_TAG}" >/dev/null 2>&1; then
+          echo "✖ backend:${_TAG} 已經存在。tag 遞增不覆蓋，請換下一個號碼。"; exit 1
+        fi
+        echo "✓ backend:${_TAG} 可以用"
+
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - deploy/Dockerfile.backend
+      - -t
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:${_TAG}"
+      - .
+
+# 列在 images 的映像在所有步驟成功後才推送
+images:
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:${_TAG}"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

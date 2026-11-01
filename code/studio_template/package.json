@@ -1,0 +1,41 @@
+{
+  "name": "studio-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "管理者工作室 AI 單人開發手冊的專案範本（由 studio-init 複製，scripts/init.sh 會改掉 name）",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter backend --filter front run dev",
+    "build": "pnpm --filter @studio/api-client run gen && pnpm -r --filter './front' --filter './backend' run build",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm --filter front run lint",
+    "test": "pnpm --filter @studio/guard-kit run test && pnpm --filter backend run test && pnpm --filter front run test",
+    "contract:drift": "node scripts/check-contract-drift.mjs",
+    "openapi:lint": "redocly lint api/openapi.yaml",
+    "openapi:gen": "pnpm --filter @studio/api-client run gen",
+    "e2e": "bash tests/e2e/run-e2e.sh",
+    "verify-env": "bash scripts/verify-env.sh"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.34.0",
+    "typescript": "^5.8.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "undici": "^6.29.1",
+      "@faker-js/faker": "^10.5.0",
+      "deepmerge-ts": "^8.0.0",
+      "tinypool": "^2.1.2"
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "msw",
+      "prisma"
+    ]
+  }
+}

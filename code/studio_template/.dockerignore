@@ -1,0 +1,19 @@
+# 本機用 docker build 時排除（Cloud Build 上傳時另由 .gcloudignore 過濾）。
+# 最重要的是 .env：Dockerfile 會 COPY backend，沒擋就會把本機密鑰燒進映像。
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+secrets/
+gcp/
+
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/.storage-test
+tests/e2e/test-results
+tests/e2e/playwright-report
+.claude/tmp
+.git
+.DS_Store

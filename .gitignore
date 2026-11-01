@@ -1,0 +1,19 @@
+# 作業系統與編輯器
+.DS_Store
+Thumbs.db
+
+# 舊版文件只留在本機，GitHub 只放最新版
+report/archive/
+
+# 相依與建置產物（範本專案若在原地安裝過）
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+__pycache__/
+
+# 環境與密鑰：只有 .example 進版控
+.env
+.env.*
+!.env.example
+!.env.*.example

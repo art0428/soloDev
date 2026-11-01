@@ -1,0 +1,57 @@
+// schema 的唯一來源。改這裡的完整流程在 .claude/skills/dev-guidelines/SKILL.md 第 3 節：
+// 寫 migration（只新增、nullable 或帶預設）→ prisma generate → test:migrate → 只新增的才套開發庫 → 回報。
+// 事件時刻一律 DateTime（UTC）；業務日期用 String 存 YYYY-MM-DD（dev-guidelines 4.7）。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// 使用者。主鍵是 MCC 的 sub（mccSub），不是 email（mcc-integration 鐵則 3）。
+model User {
+  id          String     @id @default(uuid())
+  mccSub      String     @unique
+  email       String?
+  name        String
+  avatarUrl   String?
+  createdAt   DateTime   @default(now())
+  lastLoginAt DateTime?
+  roles       UserRole[]
+  sessions    Session[]
+}
+
+/// 角色。範本只有 admin、member；業務角色由步 2 從原型「角色與權限」段補。
+model Role {
+  id    String     @id @default(uuid())
+  code  String     @unique
+  name  String
+  users UserRole[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+/// 登入 Session。Cookie 只放隨機 token，資料庫存它的 sha256；MCC 的 token 留在這裡不進瀏覽器。
+model Session {
+  id              String    @id @default(uuid())
+  tokenHash       String    @unique
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mccAccessToken  String?
+  mccRefreshToken String?
+  lastCheckedAt   DateTime?
+  createdAt       DateTime  @default(now())
+  expiresAt       DateTime
+
+  @@index([userId])
+}

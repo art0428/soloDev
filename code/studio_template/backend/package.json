@@ -1,0 +1,46 @@
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fastify 5 + Prisma 6 + TypeScript 後端。登入走 MCC OIDC（BFF，httpOnly Cookie）。",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "bash scripts/run-tests.sh",
+    "test:migrate": "SCHEMA_MODE=migrate bash scripts/run-tests.sh",
+    "test:coverage": "COVERAGE=1 bash scripts/run-tests.sh",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:status": "prisma migrate status",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "script": "tsx",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.0.0",
+    "@prisma/client": "^6.8.0",
+    "@studio/demo-world": "workspace:*",
+    "dotenv": "^16.5.0",
+    "fastify": "^5.3.0",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@studio/guard-kit": "workspace:*",
+    "@types/node": "^22.15.0",
+    "@vitest/coverage-v8": "^3.2.0",
+    "msw": "^2.8.0",
+    "openapi-response-validator": "^12.1.0",
+    "prisma": "^6.8.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0",
+    "yaml": "^2.8.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@studio/guard-kit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "守衛測試共用的掃描工具：列檔、去註解、抓含中文的字串、找違規、讀 ui-terms 詞表。前後端的守衛都用這一份。",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}

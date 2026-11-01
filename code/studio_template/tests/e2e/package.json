@@ -1,0 +1,17 @@
+{
+  "name": "e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright E2E。一律用 run-e2e.sh 起拋棄式環境再跑，不直接對開發環境跑。",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "install-browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.0"
+  }
+}

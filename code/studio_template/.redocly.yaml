@@ -1,0 +1,19 @@
+extends:
+  - recommended
+
+apis:
+  main:
+    root: api/openapi.yaml
+
+rules:
+  operation-operationId: error
+  operation-description: error
+  # 每支 API 都要寫至少一個 4xx（誰不能打、什麼情況拒絕）。/health 是唯一例外，列在 .redocly.lint-ignore.yaml。
+  operation-4xx-response: error
+  # 登入的導向端點只回 302，沒有 2xx 是正常的
+  operation-2xx-response: off
+  # ValidationFailed 等共用回應先定義好等業務 API 用，不當警告
+  no-unused-components: off
+  security-defined: error
+  # 內部專案沒有授權網址
+  info-license-strict: off

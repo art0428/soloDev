@@ -1,0 +1,78 @@
+/*
+ * 最小樣式。正式開發請照管理者工作室設計系統（https://art0428.github.io/webdesign/）選一套風格 S1 到 S7，
+ * 把 :root 的 token 換成那一套；元件只用 token，不寫死顏色。
+ * 唯一有行為意義的是 .spin（Spinner 的轉圈）：全站只有這一個 keyframes，不要在別處再寫 animation。
+ */
+:root {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --primary: #2563eb;
+  --primary-text: #ffffff;
+  --danger: #b91c1c;
+  --radius: 8px;
+  --control-h: 40px;
+  --control-h-sm: 32px;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { font: 14px/1.6 system-ui, -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif; color: var(--text); background: var(--bg); }
+a { color: var(--primary); }
+h1 { font-size: 20px; margin: 0; }
+.h1-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: var(--control-h); padding: 0 14px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font: inherit; cursor: pointer; text-decoration: none;
+}
+.btn:disabled { opacity: .6; cursor: default; }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
+
+/* Spinner：顏色走 currentColor；減少動態效果時放慢而不是停掉（停掉就看不出還在忙） */
+.spin {
+  display: inline-block; vertical-align: -2px; border-radius: 50%;
+  border-style: solid; border-color: currentColor; border-right-color: transparent;
+  animation: spin-rot .7s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 1.6s; } }
+@keyframes spin-rot { to { transform: rotate(360deg); } }
+
+.shell { display: flex; min-height: 100%; }
+.sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px 12px; }
+.brand { font-weight: 700; font-size: 16px; padding: 4px 8px 16px; }
+.nav-item { display: block; padding: 8px 10px; border-radius: var(--radius); color: var(--text); text-decoration: none; }
+.nav-item.active { background: var(--bg); color: var(--primary); font-weight: 600; }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.me { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.avatar-text { display: inline-flex; align-items: center; justify-content: center; background: var(--primary); color: var(--primary-text); font-weight: 600; }
+.roles { color: var(--muted); font-size: 12px; }
+.content { padding: 20px; }
+
+.state { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 24px; color: var(--muted); }
+.state-title { margin: 0; color: var(--text); }
+.state-hint { margin: 0; }
+.state-error .state-title { color: var(--danger); }
+
+.login { max-width: 420px; margin: 10vh auto; padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.login h1 { margin-bottom: 8px; }
+.login-hint { color: var(--muted); margin: 0 0 20px; }
+.login-actions { display: flex; flex-direction: column; gap: 10px; }
+.login-dev { margin: 0; font-size: 12px; color: var(--danger); }
+
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+
+@media (max-width: 767px) {
+  .shell { flex-direction: column; }
+  .sidebar { width: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+  .content { padding: 16px; }
+  .btn { height: 44px; }
+}

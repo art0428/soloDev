@@ -1,0 +1,303 @@
+openapi: 3.0.3
+info:
+  title: <專案名> API
+  version: 0.1.0
+  license:
+    name: 專案自有，未授權外部使用
+  description: |
+    前後端的唯一事實來源。規則見 CLAUDE.md 第 5 節：先改這份再改程式；
+    改完 `pnpm openapi:lint` 與 `pnpm openapi:gen`。
+
+    骨架附三類端點：登入（/auth/*）、使用者自己（/api/me）、健康檢查（/health）。
+    步 2 從原型推出的業務 API 往 `/api/...` 加，不要重寫這三類。
+
+    每支 API 的 description 要寫清楚誰能打、什麼情況回 403、什麼情況回 422。
+    錯誤一律回 `Error` 結構。
+servers:
+  - url: http://127.0.0.1:4200
+    description: 本機後端（前台開發伺服器會把 /api、/auth、/health 代理過去）
+  - url: https://<API 網址>
+    description: 正式
+
+tags:
+  - name: auth
+    description: 登入、登出。瀏覽器只導向，Token 由後端換、存 httpOnly Cookie。
+  - name: me
+    description: 目前登入的使用者。
+  - name: system
+    description: 健康檢查。
+
+paths:
+  /health:
+    get:
+      tags: [system]
+      operationId: getHealth
+      summary: 健康檢查
+      description: 任何人都能打。煙霧測試與 Cloud Run 探測用。不查資料庫。
+      security: []
+      responses:
+        '200':
+          description: 服務活著
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /auth/login:
+    get:
+      tags: [auth]
+      operationId: authLogin
+      summary: 開始登入
+      description: |
+        任何人都能打。AUTH_MODE=mcc 時 302 導向 MCC 授權頁；
+        AUTH_MODE=mock（只准本機與測試）時用 `as` 參數直接以種子使用者登入，302 導回前台。
+        `as` 給的使用者不存在回 404。正式環境不會有 mock 模式，啟動時就擋掉。
+      security: []
+      parameters:
+        - name: as
+          in: query
+          required: false
+          description: 只在 mock 模式有效。種子使用者的 mccSub，例如 `mock-admin`、`mock-member`。
+          schema:
+            type: string
+      responses:
+        '302':
+          description: 導向 MCC 或導回前台
+          headers:
+            Location:
+              schema:
+                type: string
+            Set-Cookie:
+              description: mock 模式直接發 Session Cookie；mcc 模式先發 state Cookie
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /auth/callback:
+    get:
+      tags: [auth]
+      operationId: authCallback
+      summary: MCC 登入完成後跳回
+      description: |
+        只有 MCC 會打。驗 state、用 code 換 token、從 id_token 取 sub／email／name，
+        以 sub 找使用者（找不到就建立；第一位使用者自動成為管理員），發 Session Cookie，302 導回前台。
+        state 不符或缺 code 回 400。
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: 導回前台
+          headers:
+            Location:
+              schema:
+                type: string
+            Set-Cookie:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      operationId: authLogout
+      summary: 登出
+      description: 已登入者打。刪除 Session、清 Cookie。沒登入打也回 204，不洩漏狀態。
+      security:
+        - cookieAuth: []
+      responses:
+        '204':
+          description: 已登出
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/me:
+    get:
+      tags: [me]
+      operationId: getMe
+      summary: 目前登入的使用者
+      description: 已登入者打。回名稱、頭像、角色代碼；前台依角色決定選單。沒登入回 401。
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 使用者資料
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin/ping:
+    get:
+      tags: [me]
+      operationId: adminPing
+      summary: 管理員權限示範端點
+      description: |
+        只有角色含 `admin` 的人能打，其他人回 403。這支是 requireRole 的示範與測試錨點，
+        步 2 寫業務 API 時照這個樣子寫權限描述。
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 是管理員
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sid
+      description: httpOnly Session Cookie，由 /auth/callback（或 mock 模式的 /auth/login）發出。前端不碰 Token。
+
+  schemas:
+    Health:
+      type: object
+      required: [ok, authMode, businessTz]
+      properties:
+        ok:
+          type: boolean
+        authMode:
+          type: string
+          enum: [mcc, mock]
+        businessTz:
+          type: string
+          description: 業務時區的 IANA 名稱
+          example: Asia/Taipei
+        version:
+          type: string
+          nullable: true
+          description: 部署的版本標記（git tag），本機為 null
+
+    Me:
+      type: object
+      required: [id, name, roles, createdAtInstant]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        roles:
+          type: array
+          description: 角色代碼，例如 `admin`、`member`
+          items:
+            type: string
+        createdAtInstant:
+          type: string
+          format: date-time
+          description: 建檔時刻（UTC，ISO 8601）。前端依觀看者時區顯示。
+        lastLoginAtInstant:
+          type: string
+          format: date-time
+          nullable: true
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: 機器讀的代碼，例如 `UNAUTHORIZED`、`FORBIDDEN`、`NOT_FOUND`、`VALIDATION_FAILED`
+            message:
+              type: string
+              description: 給人看的完整句子，照 docs/ui-terms.md 用字
+            details:
+              type: array
+              nullable: true
+              description: 422 時逐欄位的錯誤
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+
+  responses:
+    BadRequest:
+      description: 請求格式錯
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: 沒登入
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: 沒權限
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 找不到
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    # 有 request body 的業務 API 都要掛 '422': $ref ValidationFailed（詳見 Error.details）
+    ValidationFailed:
+      description: 資料驗證失敗
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: 伺服器錯誤
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

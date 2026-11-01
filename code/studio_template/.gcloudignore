@@ -1,0 +1,36 @@
+# gcloud builds submit 上傳時排除的檔案。
+# 有這個檔時 gcloud 不看 .gitignore，所以第一行把 .gitignore 整份帶進來（.env、secrets/、正式庫備份都在那裡擋）。
+# 上傳的東西只給 deploy/Dockerfile.backend 建後端映像用，前台是本機 build 後上傳到 Cloud Storage，不經過這裡。
+# 改完用這行看實際會上傳哪些檔（本機指令，不連線）：gcloud meta list-files-for-upload
+#!include:.gitignore
+
+.gcloudignore
+.git/
+.gitignore
+
+# 文件、AI 設定、CI、前台、測試、契約、腳本：建後端映像用不到
+docs/
+.claude/
+.github/
+front/
+admin/
+tests/
+api/
+scripts/
+README.md
+CLAUDE.md
+packages/api-client/
+
+# guard-kit 是後端的開發相依，安裝時要它的 package.json，程式碼用不到
+packages/guard-kit/*
+!packages/guard-kit/package.json
+
+# deploy/ 只要 Dockerfile
+deploy/*
+!deploy/Dockerfile.backend
+
+# 後端的測試與守衛不進映像
+backend/src/**/*.test.ts
+backend/src/test/
+backend/src/guards/
+backend/vitest.config.ts

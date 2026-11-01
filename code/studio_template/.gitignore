@@ -1,0 +1,25 @@
+# 相依與建置產物
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# 環境與密鑰：只有 .example 進版控
+.env
+.env.*
+!.env.example
+!.env.*.example
+secrets/
+
+# 正式庫備份（部署前 pg_dump 的檔）
+gcp/db/backup/
+
+# 測試與工具產生的
+backend/.storage-test/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+.claude/tmp/
+.iso-base
+
+# 作業系統
+.DS_Store

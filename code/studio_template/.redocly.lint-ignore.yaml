@@ -1,0 +1,4 @@
+# 只有 /health 可以沒有 4xx 回應（它不收參數、不需登入）。其他端點不要加進來，照規則補 4xx。
+api/openapi.yaml:
+  operation-4xx-response:
+    - '#/paths/~1health/get/responses'

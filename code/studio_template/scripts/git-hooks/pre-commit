@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# pre-commit：只跑「改到的那一端」的快檢查，幾秒內跑完；完整測試在併回 main 前與夜間守衛。
+# 啟用：git config core.hooksPath scripts/git-hooks（scripts/init.sh 會做）。
+#   改到 backend/src、api/openapi.yaml、backend/prisma/schema.prisma → 契約漂移檢查；改到契約再加 openapi:lint
+#   改到 front/src → ESLint（react-hooks/rules-of-hooks）
+#   改到 schema.prisma 卻沒有新 migration → 提醒（不擋，因為可能只是註解）
+#   任何地方出現 .env（非 .example）被加進版控 → 擋
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[[ -z "$staged" ]] && exit 0
+
+fail=0
+say() { echo "[pre-commit] $*"; }
+
+# .env、.env.local、.env.production 都擋；只有 .example 結尾的範本可以進版控
+env_files=$(echo "$staged" | grep -E '(^|/)\.env(\.[A-Za-z0-9_-]+)?$' | grep -Ev '\.example$' || true)
+if [[ -n "$env_files" ]]; then
+  say "✖ 有 .env 被加進版控（密鑰不進 git）："; echo "$env_files"; fail=1
+fi
+
+if echo "$staged" | grep -Eq '^(backend/src/|api/openapi\.yaml|backend/prisma/schema\.prisma)'; then
+  say "契約漂移檢查…"
+  node scripts/check-contract-drift.mjs || fail=1
+fi
+
+if echo "$staged" | grep -q '^api/openapi\.yaml'; then
+  say "契約格式（redocly lint）…"
+  pnpm -s openapi:lint >/dev/null || { say "✖ openapi:lint 不過，執行 pnpm openapi:lint 看明細"; fail=1; }
+  if [[ -z "$(echo "$staged" | grep '^packages/api-client/src/schema\.d\.ts$' || true)" ]]; then
+    say "※ 改了契約但沒一起提交 packages/api-client/src/schema.d.ts，記得先 pnpm openapi:gen"
+  fi
+fi
+
+if echo "$staged" | grep -q '^front/src/'; then
+  say "前台 ESLint（hooks 規則）…"
+  pnpm -s --filter front run lint || fail=1
+fi
+
+if echo "$staged" | grep -q '^backend/prisma/schema\.prisma$' && ! echo "$staged" | grep -q '^backend/prisma/migrations/'; then
+  say "※ 改了 schema.prisma 但這次提交沒有新的 migration：確認是不是只改了註解；不是的話照 dev-guidelines 第 3 節補 migration"
+fi
+
+if [[ $fail -ne 0 ]]; then say "✖ 有檢查沒過，這次提交沒有進去"; exit 1; fi
+say "✓ 通過"
