@@ -75,6 +75,8 @@ skill 會複製範本、建齊資料夾、git init 並首次提交，最後印�
 
 三者一起改版：改手冊就重建範本、重新打包 skill，打相同版本號。
 
+每次改版都會發一個 GitHub Release，附上新的 .skill 檔與更新說明。想收到通知：在 repo 頁面右上角按 Watch，選 Custom，勾 Releases，之後每發一版 GitHub 會寄 email 給你。已開工的專案不受新版影響，新專案才用新範本。
+
 ## 維護範本
 
 1. 直接修改 `code/studio_template/` 裡的檔案（範本自己的 `docs/管理者工作室AI單人開發手冊.md` 是手冊副本，要跟 `report/` 的同步）。
