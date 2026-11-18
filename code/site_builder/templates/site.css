@@ -1,0 +1,94 @@
+/* soloDev 文件站：頁面層版面。
+   元件樣式來自管理者工作室設計系統的 dist（S6 石墨），這份只負責排版；
+   顏色、字級、行距、間距一律引用 token，不寫死。 */
+
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--sp-10) + var(--sp-4))}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0}
+html.sd-open{overflow:hidden}
+
+/* ── 頂列：吸附在最上方 ── */
+.sd-top{position:sticky;top:0;z-index:var(--z-sticky)}
+.sd-mode svg{display:none}
+.sd-mode[data-mode="system"] .sd-i-system,
+.sd-mode[data-mode="light"] .sd-i-light,
+.sd-mode[data-mode="dark"] .sd-i-dark{display:block}
+
+/* ── 連結型按鈕 ── */
+a.btn{text-decoration:none;gap:var(--sp-2)}
+a.btn:not(.primary){color:var(--ink)}
+
+/* ── 首頁容器與區段 ── */
+.sd-wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-6)}
+.sd-hero{padding:var(--sp-10) 0 var(--sp-6)}
+.sd-kick{font-size:var(--fs-l2);line-height:var(--lh-l2);letter-spacing:var(--ls-l2);font-weight:700;color:var(--muted);margin:0 0 var(--sp-3)}
+.sd-title{font-size:var(--fs-h0);line-height:var(--lh-h0);letter-spacing:var(--ls-h0);font-weight:900;margin:0 0 var(--sp-4);text-wrap:balance}
+.sd-lead{font-size:var(--fs-b1);line-height:var(--lh-b1);margin:0 0 var(--sp-6);max-width:62ch}
+.sd-acts{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3)}
+.sd-meta{font-size:var(--fs-b3);line-height:var(--lh-b3);color:var(--muted);margin:var(--sp-4) 0 0}
+.sd-sec{padding:var(--sp-8) 0 0}
+.sd-sec>h2{font-size:var(--fs-h1);line-height:var(--lh-h1);letter-spacing:var(--ls-h1);font-weight:900;margin:0 0 var(--sp-2)}
+.sd-sec>h2+.sd-lead{margin-top:var(--sp-4)}
+.sd-sec>.sd-lead{margin-bottom:var(--sp-4)}
+.sd-sub{font-size:var(--fs-b1);line-height:var(--lh-b1);color:var(--muted);margin:0 0 var(--sp-6);max-width:62ch}
+.sd-sec .card{max-width:none}
+.sd-sec .card-body p{margin:0}
+.sd-sec .card-body code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:var(--fs-b3);line-height:var(--lh-b3);background:var(--paperc);border:1px solid var(--line);border-radius:4px;padding:0 var(--sp-1);overflow-wrap:anywhere}
+.sd-sec .card-body p+p,.sd-sec .card-body .codeblk{margin-top:var(--sp-3)}
+.sd-sec .card-body a,.sd-sec .sd-lead a,.sd-foot a,.t td a{color:var(--acc);text-decoration:underline;text-underline-offset:0.2em}
+.sd-sec .notice{max-width:none}
+.sd-foot{margin-top:var(--sp-10);padding:var(--sp-6) 0 var(--sp-8);border-top:1px solid var(--line);font-size:var(--fs-b3);line-height:var(--lh-b3);color:var(--muted)}
+.sd-foot p{margin:0}
+
+/* ── 選單與章節目錄：桌機是側欄，手機是覆蓋式抽屜 ── */
+.sd-side{padding:var(--sp-6) var(--sp-3)}
+.sd-side nav{display:flex;flex-direction:column;gap:var(--sp-1)}
+.sd-side .nitem{text-decoration:none;box-sizing:border-box;width:100%}
+.sd-grp{font-size:var(--fs-l2);line-height:var(--lh-l2);letter-spacing:var(--ls-l2);font-weight:700;color:var(--muted);margin:0 0 var(--sp-2);padding:0 var(--sp-4)}
+.sd-side-h,.sd-site,.sd-scrim{display:none}
+.sd-side.sd-menu-only{display:none}
+
+/* ── 手冊頁：側欄 ＋ 內文 ── */
+.sd-doc{display:grid;grid-template-columns:226px minmax(0,1fr);max-width:1280px;margin:0 auto}
+.sd-doc .sd-side{position:sticky;top:var(--sp-10);align-self:start;max-height:calc(100dvh - var(--sp-10));overflow-y:auto;box-sizing:border-box}
+.sd-body{min-width:0;padding:var(--sp-7) var(--sp-6) var(--sp-10)}
+.sd-dochead{margin:0 0 var(--sp-7)}
+.sd-desc{font-size:var(--fs-b1);line-height:var(--lh-b1);color:var(--muted);margin:0;max-width:62ch}
+.sd-dochead .sd-meta a{color:var(--acc);text-decoration:underline;text-underline-offset:0.2em}
+
+/* 長文排版：文字維持 62ch 行寬，表格與程式碼區塊可以用到整個內容欄 */
+.sd-body .prose{max-width:none}
+.sd-body .prose>:where(h2,h3,p,ul,ol,blockquote){max-width:62ch}
+.sd-body .prose>hr{border:0;border-top:1px solid var(--line);margin:var(--sp-7) 0}
+.sd-body .prose>hr+h2{margin-top:0}
+.sd-body .prose li>ul,.sd-body .prose li>ol{margin:0;padding-left:var(--sp-6)}
+.sd-body .prose li>p{margin:0}
+.sd-body .prose td{vertical-align:top}
+.sd-body .prose code{overflow-wrap:anywhere}
+.sd-body .prose>.codeblk{max-width:100%;box-sizing:border-box;margin:0 0 var(--sp-4)}
+.codeblk pre.sd-soft{white-space:pre-wrap;overflow-wrap:anywhere}
+
+@media (max-width:1023px){
+  .sd-wrap{padding:0 var(--sp-5)}
+  .sd-body{padding:var(--sp-7) var(--sp-5) var(--sp-10)}
+}
+
+@media (max-width:767px){
+  .sd-wrap{padding:0 var(--sp-4)}
+  .sd-hero{padding:var(--sp-8) 0 var(--sp-4)}
+  .sd-acts .btn{flex:1 1 100%}
+  .sd-doc{display:block}
+  .sd-body{padding:var(--sp-6) var(--sp-4) var(--sp-9)}
+  .sd-body .prose table[data-cols="3"]{min-width:64rem}
+
+  .sd-side,.sd-doc .sd-side,.sd-side.sd-menu-only{display:block;position:fixed;top:0;left:0;bottom:0;width:min(30rem,86vw);max-height:none;overflow-y:auto;box-sizing:border-box;padding:0 var(--sp-3) var(--sp-6);background:var(--page);border-right:1px solid var(--line);z-index:var(--z-drawer);transform:translateX(-100%);visibility:hidden;transition:transform var(--dur-3) var(--ease-in),visibility 0s linear var(--dur-3)}
+  .sd-open .sd-side{transform:none;visibility:visible;transition:transform var(--dur-3) var(--ease-out)}
+  .sd-scrim{display:block;position:fixed;inset:0;z-index:var(--z-drawer);background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity var(--dur-3) var(--ease-in)}
+  .sd-open .sd-scrim{opacity:1;pointer-events:auto;transition:opacity var(--dur-3) var(--ease-out)}
+  .sd-side-h{display:flex;align-items:center;justify-content:space-between;min-height:var(--sp-10);padding:0 0 0 var(--sp-4);margin:0 0 var(--sp-3);font-size:var(--fs-h3);line-height:var(--lh-h3);letter-spacing:var(--ls-h3);font-weight:900}
+  .sd-x{min-width:44px;min-height:4.4rem;display:inline-flex;align-items:center;justify-content:center;border:none;background:none;color:var(--ink);cursor:pointer;border-radius:var(--r-sm)}
+  .sd-x:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+  .sd-site{display:block}
+  .sd-site+.sd-toc{margin-top:var(--sp-6)}
+  .sd-site .btn{width:100%;box-sizing:border-box;margin-top:var(--sp-3)}
+}

@@ -1,0 +1,110 @@
+{{HEAD}}
+<body data-type="expressive">
+{{HEADER}}
+{{MENU}}
+<main class="sd-wrap">
+
+  <section class="sd-hero">
+    <p class="sd-kick">SOLODEV · 管理者工作室</p>
+    <h1 class="sd-title">一份原型，一個人，<br>做出整套系統</h1>
+    <p class="sd-lead">你負責想清楚要做什麼、畫出原型、做決定與驗收；寫程式、寫測試、寫文件、跑檢查交給 Claude Code。這裡提供照著做就能完成的手冊、能直接啟動的專案範本，以及把範本建進新專案的初始化 skill。</p>
+    <div class="sd-acts">
+      <a class="btn primary" href="{{SKILL_URL}}"><svg class="ic" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>下載初始化 skill</a>
+      <a class="btn" href="handbook.html">讀手冊</a>
+    </div>
+    <p class="sd-meta">手冊 {{HB_VERSION}} · 專案範本 studio-template {{SKILL_VERSION}} · {{SKILL_FILE}}</p>
+  </section>
+
+  <section class="sd-sec" aria-labelledby="sec-what">
+    <h2 id="sec-what">這裡有三樣東西</h2>
+    <p class="sd-sub">三樣一起改版、打相同的版本號，拿到的是配好的一組。</p>
+    <div class="grid">
+      <div class="card col-4">
+        <div class="card-title">手冊</div>
+        <div class="card-body">
+          <p>每一步做什麼、怎樣算做完、給 AI 的話怎麼說。從原型到第一版上線共七步，之後每個需求照「切片五步」做一輪。</p>
+          <p><a href="handbook.html">讀手冊</a></p>
+        </div>
+      </div>
+      <div class="card col-4">
+        <div class="card-title">專案範本</div>
+        <div class="card-body">
+          <p>一套能直接啟動的專案骨架：前台與後端的登入流程、API 契約、示範資料、部署文件，以及守衛測試。守衛測試是掃原始碼、擋掉危險寫法的自動檢查。</p>
+          <p><a href="{{REPO_URL}}/tree/main/code/studio_template">看範本內容</a></p>
+        </div>
+      </div>
+      <div class="card col-4">
+        <div class="card-title">初始化 skill</div>
+        <div class="card-body">
+          <p>skill 是給 Claude 的做事說明書。裝好後在空資料夾說「初始化專案」，範本就會建進你的資料夾，並完成第一次提交。</p>
+          <p><a href="{{SKILL_URL}}">下載 {{SKILL_FILE}}</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sd-sec" aria-labelledby="sec-start">
+    <h2 id="sec-start">四步開始</h2>
+    <p class="sd-sub">前三步只做一次，第四步是之後每天的工作方式。</p>
+    <div class="grid">
+      <div class="card col-6">
+        <div class="card-title">一、安裝 skill</div>
+        <div class="card-body">
+          <p>下載 skill 檔，在 Claude 桌面版的 Skills 設定上傳；用命令列版就解壓到 <code>~/.claude/skills/</code>。</p>
+          <p>裝過舊的 project-init 請先移除，兩個不要同時裝。</p>
+        </div>
+      </div>
+      <div class="card col-6">
+        <div class="card-title">二、做好原型</div>
+        <div class="card-body">
+          <p>做一份 <code>index_v1.html</code>，所有畫面、狀態與欄位都要畫出來。沒有原型不要開工，AI 會自己猜。</p>
+          <p><a href="handbook.html#ch-4">手冊第 4 章：原型怎麼做才夠用</a></p>
+        </div>
+      </div>
+      <div class="card col-6">
+        <div class="card-title">三、初始化專案</div>
+        <div class="card-body">
+          <p>開一個空資料夾，把原型放進 <code>docs/prototype/</code>，打開 Claude Code 說：</p>
+          <div class="codeblk"><div class="cbar">對 Claude 說<button class="btn sm" type="button" data-copy><svg class="ic" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>複製</span></button></div><pre>初始化專案</pre></div>
+        </div>
+      </div>
+      <div class="card col-6">
+        <div class="card-title">四、照手冊開發</div>
+        <div class="card-body">
+          <p>第一版照<a href="handbook.html#ch-6">第 6 章</a>的步 0 到步 6 做到上線。</p>
+          <p>之後每個新需求與每個 bug，照<a href="handbook.html#ch-7">第 7 章</a>的切片五步做一輪。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sd-sec" aria-labelledby="sec-need">
+    <h2 id="sec-need">開工前要準備</h2>
+    <p class="sd-sub">本機先用假登入就能跑起來，接真實登入與部署時才需要後兩項。</p>
+    <div class="tblwrap">
+      <table class="t">
+        <thead><tr><th>項目</th><th>版本或說明</th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td>桌面版或命令列版皆可</td></tr>
+          <tr><td>Node.js</td><td>22，範本會鎖定版本</td></tr>
+          <tr><td>pnpm</td><td>10，沒有時初始化腳本會改用 corepack</td></tr>
+          <tr><td>PostgreSQL</td><td>本機一個開發用資料庫</td></tr>
+          <tr><td>MCC 帳號</td><td>MCC 是管理者中心的登入平台，接真實登入時才需要測試憑證</td></tr>
+          <tr><td>Docker 與 GCP</td><td>選配，要部署到正式機時才需要</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="sd-sec" aria-labelledby="sec-update">
+    <h2 id="sec-update">改版通知</h2>
+    <p class="sd-lead">每次改版都會發一個 GitHub Release，附上新的 skill 檔與更新說明。到 <a href="{{REPO_URL}}">GitHub repo</a> 右上角按 <b>Watch</b>，選 <b>Custom</b>，勾 <b>Releases</b>，之後每發一版 GitHub 會寄 email 給你。</p>
+    <div class="notice">已開工的專案不受新版影響，新專案才用新範本。</div>
+  </section>
+
+{{FOOTER}}
+</main>
+<script src="{{DS_URL}}/theme.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -14,6 +14,8 @@
 | `code/studio_template/` | 專案範本 studio-template v1：CLAUDE.md、dev-guidelines、守衛測試、前後端登入骨架、示範世界、部署文件 | 由 skill 自動複製，一般不用手動碰 |
 | `code/studio_init/` | studio-init skill 的 SKILL.md 與打包腳本 `build_skill.py` | 維護範本的人 |
 | `skill/studio-init_v1.skill` | 打包好的 skill，裝進 Claude 後就能用「初始化專案」建專案 | 每個開發者，裝一次 |
+| `docs/` | 文件站的網頁（首頁與手冊閱讀頁），由腳本產生，不要手改 | GitHub Pages 讀這個資料夾 |
+| `code/site_builder/` | 文件站產生器：把手冊 md 轉成網頁的腳本與版面樣板 | 維護範本的人 |
 
 ## 團隊怎麼用（四步）
 
@@ -87,6 +89,16 @@ python3 code/studio_init/build_skill.py
 ```
 
 腳本只用 Python 標準函式庫，會檢查不該進套件的東西（.env、node_modules、建置產物）、env 範例檔密鑰欄位必須是空的、關鍵檔案都在，通過才會寫出 `skill/studio-init_<版本>.skill`。
+
+3. 重建文件站，讓網頁上的手冊與下載連結跟著更新：
+
+```
+node code/site_builder/build_site.mjs
+```
+
+腳本會找 `report/` 裡版本號最大的手冊與 `skill/` 裡版本號最大的 .skill，重新產生 `docs/`。不用安裝任何套件，只需要 Node。要先在本機看結果：`node code/site_builder/preview.mjs`，再開 http://127.0.0.1:61002/ 。版面用管理者工作室設計系統的 S6 石墨風格，要改版面改 `code/site_builder/templates/`。
+
+4. commit 並 push，再到 GitHub 發一個 Release 附上新的 .skill 檔。
 
 ## 安全說明
 
