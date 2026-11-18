@@ -2,6 +2,8 @@
 
 一個人、一份前台原型、一組 Claude Code 對話，把一套完整的系統做出來並持續優化。
 
+**線上文件站：https://art0428.github.io/soloDev/** （首頁、四步驟用法、手冊線上閱讀）　｜　**下載最新版 skill：[Releases](https://github.com/art0428/soloDev/releases/latest)**
+
 這個 repo 收錄三樣東西：**手冊**（流程與規則）、**專案範本**（能直接跑的前後端骨架與守衛）、**初始化 skill**（把範本一鍵建到新專案）。團隊成員只要做好一份原型 index.html，就能照手冊讓 Claude Code 開發出整套系統。
 
 ## 內容
